@@ -7,6 +7,7 @@ client = commands.Bot(command_prefix='!')
 
 
 # Change Per Server Deployment
+token = 'bot_token'
 user_queue = []
 lesson_mode = None
 teacher = 307362705684299777
@@ -188,4 +189,4 @@ async def attendance(ctx, *, student_name):
     attendance_file.close()
     await ctx.send(f'{student_name} is here')
 
-client.run('NjkwMjc0NTk0Mzc1OTkxMzc3.XnPCWw.qXrM4Xf2BJtoVF7eIvipZFARh6E')
+client.run(token)
