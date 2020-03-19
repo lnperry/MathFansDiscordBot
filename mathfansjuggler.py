@@ -132,5 +132,5 @@ async def attendance(ctx, *, student_name):
     await ctx.send(f'{student_name} is here')
 
 
-client.run('Njg4MDgyMzI4NTI2MTI3MzU1.XmvIpg.z1pP98ga2N4deziM9SSH3dy4gZ8')
+client.run('token')
 
