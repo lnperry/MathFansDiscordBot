@@ -29,7 +29,6 @@ def get_guild(guild_str):
 user_queue = []
 question_mode = 'single'
 lesson_mode = None
-guild_obj = get_guild(server_name)
 
 
 # Subroutine to change lesson_mode
@@ -56,6 +55,7 @@ async def on_ready():
 # Checks for new member join and mutes them.
 @client.event
 async def on_voice_state_update(member, before, after):
+    guild_obj = get_guild(server_name)
     # checks if in lesson mode
     if lesson_mode:
         if before.channel is None and after.channel is not None:
@@ -66,6 +66,7 @@ async def on_voice_state_update(member, before, after):
 # sub routine for done/forcedone to prompt next user
 @client.command()
 async def next(ctx):
+    guild_obj = get_guild(server_name)
     # checks user permissions
     if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
@@ -98,6 +99,7 @@ async def qauto(ctx):
         return
     global question_mode
     question_mode = 'auto'
+    await ctx.message.add_reaction("✅")
 
 
 @client.command()
@@ -108,11 +110,13 @@ async def qsingle(ctx):
         return
     global question_mode
     question_mode = 'single'
+    await ctx.message.add_reaction("✅")
 
 
 # allows current user to end their question
 @client.command()
 async def done(ctx):
+    guild_obj = get_guild(server_name)
     if not lesson_mode:
         await ctx.send('Class is not in session.')
         return
@@ -145,6 +149,7 @@ async def done(ctx):
 # allows instructor to toggle next user
 @client.command()
 async def forcedone(ctx):
+    guild_obj = get_guild(server_name)
     if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
@@ -157,7 +162,7 @@ async def forcedone(ctx):
         # if user in voice channel, unmute
         if ctx.author in get_channel('general').members:
             await guild_obj.get_member(member.id).edit(mute=True)
-            await ctx.send(f'{member} unmuted')
+            await ctx.send(f'{member} muted')
         await ctx.author.edit(mute=True)
         await ctx.send(
             f'{user_popped} is no longer in line and is now muted.')
@@ -183,6 +188,7 @@ async def queue(ctx):
 # queues user to ask a question
 @client.command()
 async def talk(ctx):
+    guild_obj = get_guild(server_name)
     if not lesson_mode:
         await ctx.send('Class is not in session.')
         return
@@ -197,6 +203,7 @@ async def talk(ctx):
     # if user queue empty
     if not user_queue:
         user_queue.append(ctx.author)
+        await ctx.send(f'{ctx.author} has been added to the queue')
         if question_mode == 'auto':
             # unmute member if in the voice channel, unmute
             if member in get_channel('General').members:
@@ -212,6 +219,7 @@ async def talk(ctx):
 # starts class
 @client.command()
 async def start(ctx):
+    guild_obj = get_guild(server_name)
     if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
@@ -230,6 +238,7 @@ async def start(ctx):
 # ends class
 @client.command()
 async def end(ctx):
+    guild_obj = get_guild(server_name)
     if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
@@ -271,9 +280,6 @@ async def bothelp(ctx):
     embed.add_field(name='!talk', value='adds the user to the voice queue', inline=False)
     embed.add_field(name='!done', value='removes the user from the voice queue', inline=False)
     embed.add_field(name='!queue', value='shows current queue to ask questions', inline=False)
-    embed.add_field(name='!forcedone', value='forcefully removes the user from the voice queue [Instructor Only]', inline=False)
-    embed.add_field(name='!start', value='unmutes all users in the server [Instructor Only]', inline=False)
-    embed.add_field(name='!end', value='mutes all users in the server [Instructor Only]', inline=False)
 
     instructor_embed = discord.Embed(
         title='Instructor Comands',
