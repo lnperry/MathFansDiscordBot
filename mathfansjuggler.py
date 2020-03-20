@@ -27,6 +27,7 @@ def get_guild(guild_str):
 
 # Default values
 user_queue = []
+question_mode = 'single'
 lesson_mode = None
 guild_obj = get_guild(server_name)
 
@@ -36,6 +37,13 @@ def change_lesson_mode(bool):
     global lesson_mode
     lesson_mode = bool
 
+
+# Subroutine to change question_mode
+def change_question_mode(str):
+    global question_mode
+    question_mode = str
+
+
 # Bot activity + load up notifier
 @client.event
 async def on_ready():
@@ -43,6 +51,7 @@ async def on_ready():
         activity=discord.Activity(
             name='with Numbers', type=discord.ActivityType.playing))
     print('Bot is ready.')
+
 
 # Checks for new member join and mutes them.
 @client.event
@@ -57,6 +66,11 @@ async def on_voice_state_update(member, before, after):
 # sub routine for done/forcedone to prompt next user
 @client.command()
 async def nextquestion(ctx):
+    # checks user permissions
+    if ctx.message.author.id != teacher:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    # checks if queue has Users
     if not user_queue:
         await ctx.send('Queue Empty')
         return
@@ -74,6 +88,27 @@ async def nextquestion(ctx):
             f'Unable to find {member} in voice channel, skipping to next user')
         await nextquestion(ctx)
         return
+
+# commands to change question_mode
+@client.command()
+async def qauto(ctx):
+    # checks user permissions
+    if ctx.message.author.id != teacher:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    global question_mode
+    question_mode = 'auto'
+
+
+@client.command()
+async def qsingle(ctx):
+    # checks user permissions
+    if ctx.message.author.id != teacher:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    global question_mode
+    question_mode = 'single'
+
 
 # allows current user to end their question
 @client.command()
@@ -99,17 +134,19 @@ async def done(ctx):
             f'{user_popped} is no longer in line and is now muted.')
         await ctx.send(
             f'There are {len(user_queue)} math fans in line.')
-        # ag next user into their question
-        await nextquestion(ctx)
+        # [Auto Mode] next user into their question
+        if question_mode == 'auto':
+            await nextquestion(ctx)
     # if user isnt currently the person talking
     else:
         await ctx.send('You are not currently talking')
+
 
 # allows instructor to toggle next user
 @client.command()
 async def forcedone(ctx):
     if ctx.message.author.id != teacher:
-        await ctx.send('Missing Permissions. Please check !help')
+        await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
     if not user_queue:
@@ -126,8 +163,10 @@ async def forcedone(ctx):
             f'{user_popped} is no longer in line and is now muted.')
         await ctx.send(
             f'There are {len(user_queue)} math fans in line.')
-        # tag next user into their question
-        await nextquestion(ctx)
+        # [Auto Mode] next user into their question
+        if question_mode == 'auto':
+            await nextquestion(ctx)
+
 
 # shows queue
 @client.command()
@@ -139,6 +178,7 @@ async def queue(ctx):
         await ctx.send(f'Current Queue: {queuelist}')
     else:
         await ctx.send('Queue is empty!')
+
 
 # queues user to ask a question
 @client.command()
@@ -157,21 +197,23 @@ async def talk(ctx):
     # if user queue empty
     if not user_queue:
         user_queue.append(ctx.author)
-        # unmute member if in the voice channel, unmute
-        if member in get_channel('General').members:
-            await guild_obj.get_member(member.id).edit(mute=False)
-            await ctx.send(f'{member} unmuted')
-        await ctx.send(f'No math fans in line. {ctx.author} unmuted.')
+        if question_mode == 'auto':
+            # unmute member if in the voice channel, unmute
+            if member in get_channel('General').members:
+                await guild_obj.get_member(member.id).edit(mute=False)
+                await ctx.send(f'{member} unmuted')
+            await ctx.send(f'No math fans in line. {ctx.author} unmuted.')
     else:
         user_queue.append(ctx.author)
         await ctx.send(
             f'{ctx.author} there are {len(user_queue) - 1} math fans ahead of you in line.')
 
+
 # starts class
 @client.command()
 async def start(ctx):
     if ctx.message.author.id != teacher:
-        await ctx.send('Missing Permissions. Please check !help')
+        await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
     # sets lesson mode
@@ -184,11 +226,12 @@ async def start(ctx):
 
     await ctx.send('Lesson Started! All users muted')
 
+
 # ends class
 @client.command()
 async def end(ctx):
     if ctx.message.author.id != teacher:
-        await ctx.send('Missing Permissions. Please check !help')
+        await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
     # sets lesson mode
@@ -199,6 +242,7 @@ async def end(ctx):
         await guild_obj.get_member(member.id).edit(mute=False)
 
     await ctx.send('All users unmuted')
+
 
 # command to count attendence
 @client.command()
@@ -212,6 +256,7 @@ async def attendance(ctx, *, student_name):
     attendance_file.write(f'{time_now.time()} {student_name}\n')
     attendance_file.close()
     await ctx.send(f'{student_name} is here')
+
 
 # bothelp command with refrence for users
 @client.command()
