@@ -8,7 +8,7 @@ client = commands.Bot(command_prefix='!')
 
 # Change Per Server Deployment
 token = 'bot_token'
-teacher = 307362705684299777
+instructor = 307362705684299777
 server_name = 'Test Server'
 
 
@@ -59,15 +59,15 @@ async def on_voice_state_update(member, before, after):
     # checks if in lesson mode
     if lesson_mode:
         if before.channel is None and after.channel is not None:
-            if member.id != teacher:
+            if member.id != instructor:
                 await guild_obj.get_member(member.id).edit(mute=True)
 
 
 # sub routine for done/forcedone to prompt next user
 @client.command()
-async def nextquestion(ctx):
+async def next(ctx):
     # checks user permissions
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
     # checks if queue has Users
@@ -86,14 +86,14 @@ async def nextquestion(ctx):
         user_queue.pop(0)
         await ctx.send(
             f'Unable to find {member} in voice channel, skipping to next user')
-        await nextquestion(ctx)
+        await next(ctx)
         return
 
 # commands to change question_mode
 @client.command()
 async def qauto(ctx):
     # checks user permissions
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
     global question_mode
@@ -103,7 +103,7 @@ async def qauto(ctx):
 @client.command()
 async def qsingle(ctx):
     # checks user permissions
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
     global question_mode
@@ -136,7 +136,7 @@ async def done(ctx):
             f'There are {len(user_queue)} math fans in line.')
         # [Auto Mode] next user into their question
         if question_mode == 'auto':
-            await nextquestion(ctx)
+            await next(ctx)
     # if user isnt currently the person talking
     else:
         await ctx.send('You are not currently talking')
@@ -145,7 +145,7 @@ async def done(ctx):
 # allows instructor to toggle next user
 @client.command()
 async def forcedone(ctx):
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
@@ -165,7 +165,7 @@ async def forcedone(ctx):
             f'There are {len(user_queue)} math fans in line.')
         # [Auto Mode] next user into their question
         if question_mode == 'auto':
-            await nextquestion(ctx)
+            await next(ctx)
 
 
 # shows queue
@@ -212,7 +212,7 @@ async def talk(ctx):
 # starts class
 @client.command()
 async def start(ctx):
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
@@ -221,7 +221,7 @@ async def start(ctx):
 
     # mute all members in the voice channel
     for member in get_channel('General').members:
-        if member.id != teacher:
+        if member.id != instructor:
             await guild_obj.get_member(member.id).edit(mute=True)
 
     await ctx.send('Lesson Started! All users muted')
@@ -230,7 +230,7 @@ async def start(ctx):
 # ends class
 @client.command()
 async def end(ctx):
-    if ctx.message.author.id != teacher:
+    if ctx.message.author.id != instructor:
         await ctx.send('Missing Permissions. Please check !bothelp')
         return
 
@@ -262,8 +262,8 @@ async def attendance(ctx, *, student_name):
 @client.command()
 async def bothelp(ctx):
     embed = discord.Embed(
-        title='Bot Commands',
-        description='Essential Commands for Users',
+        title='Student Commands',
+        description='Necessary Commands for Students',
         color=discord.Colour.blue()
     )
     embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
@@ -275,6 +275,20 @@ async def bothelp(ctx):
     embed.add_field(name='!start', value='unmutes all users in the server [Instructor Only]', inline=False)
     embed.add_field(name='!end', value='mutes all users in the server [Instructor Only]', inline=False)
 
+    instructor_embed = discord.Embed(
+        title='Instructor Comands',
+        description='Instructor Commands',
+        color=discord.Colour.purple()
+    )
+    instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
+    instructor_embed.add_field(name='!start', value='start class, will mute users in voice chat', inline=False)
+    instructor_embed.add_field(name='!end', value='ends class, will unmutes all users in voice chat', inline=False)
+    instructor_embed.add_field(name='!forcedone', value='forcefully removes the user from the voice queue', inline=False)
+    instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
+    instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
+    instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
+
     await ctx.send(embed=embed)
+    await ctx.send(embed=instructor_embed)
 
 client.run(token)
