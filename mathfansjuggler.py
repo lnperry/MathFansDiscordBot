@@ -44,10 +44,7 @@ async def on_voice_state_update(member, before, after):
     if lesson_mode == True:
         if before.channel is None and after.channel is not None:
             if member.id != teacher:
-                overwrite = discord.PermissionOverwrite()
-                overwrite.speak = True
                 await guild_obj.get_member(member.id).edit(mute=True)
-                await voice_channel.set_permissions(member, overwrite=overwrite)
 
 #sub routine for done/forcedone to prompt next user
 @client.command()
@@ -58,14 +55,10 @@ async def nextquestion(ctx):
         return
     member = guild_obj.get_member(user_queue[0].id)
     #unmute user in voice channel
-    if member in get_channel('General').members:
-        await guild_obj.get_member(member.id).edit(mute=False)
-        await ctx.send(f'{member} unmuted')
-        # if user in text channel, reinstate permissions
-        if member in get_channel('general').members:
-            await guild_obj.get_member(member.id).edit(speak=True)
-            await ctx.send(f'{member} speak permissions set to True')
-        await ctx.send(f'{newmember} is now asking his/her question')
+    if member in get_channel('general').members:
+        await guild_obj.get_member(member.id).edit(speak=True)
+        await ctx.send(f'{member} speak permissions set to True')
+        await ctx.send(f'{member} is now asking his/her question')
         return
     #if member is not found, pop and retry
     else:
@@ -90,15 +83,10 @@ async def done(ctx):
     elif ctx.message.author == user_queue[0]:
         user_popped = user_queue.pop(0)
         member = guild_obj.get_member(user_popped.id)
-        # if user in text channel, reinstate permissions
+        # if user in voice channel, mute
         if ctx.author in get_channel('general').members:
             await guild_obj.get_member(member.id).edit(mute=True)
             await ctx.send(f'{member} unmuted')
-        # if user in voice channel, unmute
-        voice_channel = get_channel('General')
-        if ctx.author in voice_channel.members:
-            await voice_channel.set_permissions(ctx.author, speak=True)
-            await ctx.send(f'{member} speak permissions set to true')
         await ctx.author.edit(mute=True)
         await ctx.send(
             f'{user_popped} is no longer in line and is now muted. There are {len(user_queue)} math fans in line.')
@@ -121,15 +109,10 @@ async def forcedone(ctx):
     else:
         user_popped = user_queue.pop(0)
         member = guild_obj.get_member(user_popped.id)
-        # if user in text channel, reinstate permissions
+        # if user in voice channel, unmute
         if ctx.author in get_channel('general').members:
             await guild_obj.get_member(member.id).edit(mute=True)
             await ctx.send(f'{member} unmuted')
-        # if user in voice channel, unmute
-        voice_channel = get_channel('General')
-        if ctx.author in voice_channel.members:
-            await voice_channel.set_permissions(ctx.author, speak=True)
-            await ctx.send(f'{member} speak permissions set to true')
         await ctx.author.edit(mute=True)
         await ctx.send(
             f'{user_popped} is no longer in line and is now muted. There are {len(user_queue)} math fans in line.')
@@ -169,12 +152,6 @@ async def talk(ctx):
         if member in get_channel('General').members:
             await guild_obj.get_member(member.id).edit(mute=False)
             await ctx.send(f'{member} unmuted')
-
-        # if user in text channel, reinstate permissions
-        if member in get_channel('general').members:
-            await guild_obj.get_member(member.id).edit(speak=True)
-            await ctx.send(f'{member} speak permissions set to True')
-
         await ctx.send(f'No math fans in line. {ctx.author} unmuted.')
     else:
         user_queue.append(ctx.author)
@@ -189,19 +166,13 @@ async def end(ctx):
     # dynamically get guild ID
     guild_obj = get_guild(server_name)
     print(f'channel {get_channel("General")}') #whats this line for?
-    
+
     #sets lesson mode
     change_lesson_mode(False)
-
 
     # unmute all members in the voice channel
     for member in get_channel('General').members:
         await guild_obj.get_member(member.id).edit(mute=False)
-
-    # set all others speak=False
-    voice_channel = get_channel('general')
-    for member in voice_channel.members:
-        await voice_channel.set_permissions(member, speak=True)
 
     await ctx.send('All users unmuted')
 
@@ -215,22 +186,13 @@ async def start(ctx):
     guild_obj = get_guild(server_name)
     voice_channel = get_channel('general')
     
-    
     # sets lesson mode
     change_lesson_mode(True)
 
-    
     # mute all members in the voice channel
     for member in get_channel('General').members:
         if member.id != teacher:
             await guild_obj.get_member(member.id).edit(mute=True)
-
-    # set all others speak=False
-    for member in voice_channel.members:
-        if member.id != teacher:
-            overwrite = discord.PermissionOverwrite()
-            overwrite.speak = False
-            await voice_channel.set_permissions(member, overwrite=overwrite)
 
     await ctx.send('Lesson Started! All users muted')
 
