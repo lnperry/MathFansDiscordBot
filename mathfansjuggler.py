@@ -272,7 +272,7 @@ async def poll(ctx, *, input_string):
 
     input_list = input_string.split('? ')
     if len(input_list) != 2:
-        await ctx.send('Formatting for polls should be: `!poll <question>*? *<option1>:<option2>`')
+        await ctx.send('Formatting for polls should be: `!poll <question>? <option1>:<option2>`')
         return
     input_question = input_list[0] + '?'
     answers = input_list[1].split(':')
@@ -294,7 +294,7 @@ async def poll(ctx, *, input_string):
 async def bothelp(ctx):
     embed = discord.Embed(
         title='Student Commands',
-        description='Necessary Commands for Students',
+        description='Commands for Students',
         color=discord.Colour.blue()
     )
     embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
@@ -302,10 +302,11 @@ async def bothelp(ctx):
     embed.add_field(name='!talk', value='adds the user to the voice queue', inline=False)
     embed.add_field(name='!done', value='removes the user from the voice queue', inline=False)
     embed.add_field(name='!queue', value='shows current queue to ask questions', inline=False)
+    embed.add_field(name='!poll', value='creates a reaction poll with format [`!poll <question>? <option1>:<option2>`]', inline=False)
 
     instructor_embed = discord.Embed(
         title='Instructor Comands',
-        description='Instructor Commands',
+        description='Commands for Instructors',
         color=discord.Colour.purple()
     )
     instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
