@@ -266,6 +266,28 @@ async def attendance(ctx, *, student_name):
     attendance_file.close()
     await ctx.send(f'{student_name} is here')
 
+# poll command for creating new polls
+@client.command()
+async def poll(ctx, *, input_string):
+
+    input_list = input_string.split('? ')
+    if len(input_list) != 2:
+        await ctx.send('Formatting for polls should be: `!poll <question>*? *<option1>:<option2>`')
+        return
+    input_question = input_list[0] + '?'
+    answers = input_list[1].split(':')
+    emoji_list = ["🐌", "🐇", "🐘", "🐖", "🐏", "🐍", "🐬"]
+    output_list = [f"Poll: {input_question}\n"]
+    if len(answers) > 7:
+        await ctx.send('Too many answers, please reduce the number of answers.')
+        return
+    for indx, val in enumerate(answers):
+        output_list.append(emoji_list[indx] + f" - {val}\n")
+    output_string = ''.join([str(elem) for elem in output_list])
+    msg = await ctx.send(output_string)
+    for indx, val in enumerate(answers):
+        await msg.add_reaction(emoji_list[indx])
+    await ctx.message.delete()
 
 # bothelp command with refrence for users
 @client.command()
