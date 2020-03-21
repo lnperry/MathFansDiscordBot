@@ -78,7 +78,14 @@ async def next(ctx):
     member = guild_obj.get_member(user_queue[0].id)
     # unmute user in voice channel
     if member in get_channel('general').members:
-        await guild_obj.get_member(member.id).edit(speak=True)
+        print(member.voice.mute)
+        if not member.voice.mute:
+            await forcedone(ctx)
+        if not user_queue:
+            await ctx.send('Queue Empty')
+            return
+        member = guild_obj.get_member(user_queue[0].id)
+        await guild_obj.get_member(member.id).edit(mute=False)
         await ctx.send(f'{member} speak permissions set to True')
         await ctx.send(f'{member} is now asking his/her question')
         return
@@ -89,6 +96,7 @@ async def next(ctx):
             f'Unable to find {member} in voice channel, skipping to next user')
         await next(ctx)
         return
+
 
 # commands to change question_mode
 @client.command()
@@ -132,7 +140,7 @@ async def done(ctx):
         # if user in voice channel, mute
         if ctx.author in get_channel('general').members:
             await guild_obj.get_member(member.id).edit(mute=True)
-            await ctx.send(f'{member} unmuted')
+            await ctx.send(f'{member} muted')
         await ctx.author.edit(mute=True)
         await ctx.send(
             f'{user_popped} is no longer in line and is now muted.')
@@ -160,17 +168,13 @@ async def forcedone(ctx):
         user_popped = user_queue.pop(0)
         member = guild_obj.get_member(user_popped.id)
         # if user in voice channel, unmute
-        if ctx.author in get_channel('general').members:
+        if member in get_channel('general').members:
             await guild_obj.get_member(member.id).edit(mute=True)
             await ctx.send(f'{member} muted')
-        await ctx.author.edit(mute=True)
         await ctx.send(
             f'{user_popped} is no longer in line and is now muted.')
         await ctx.send(
             f'There are {len(user_queue)} math fans in line.')
-        # [Auto Mode] next user into their question
-        if question_mode == 'auto':
-            await next(ctx)
 
 
 # shows queue
@@ -312,7 +316,6 @@ async def bothelp(ctx):
     instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
     instructor_embed.add_field(name='!start', value='start class, will mute users in voice chat', inline=False)
     instructor_embed.add_field(name='!end', value='ends class, will unmutes all users in voice chat', inline=False)
-    instructor_embed.add_field(name='!forcedone', value='forcefully removes the user from the voice queue', inline=False)
     instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
     instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
     instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
