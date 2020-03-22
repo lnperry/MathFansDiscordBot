@@ -24,7 +24,6 @@ def get_guild(guild_str):
         if guild.name == guild_str:
             return guild
 
-
 # Default values
 user_queue = []
 question_mode = 'single'
@@ -51,6 +50,16 @@ async def on_ready():
             name='with Numbers', type=discord.ActivityType.playing))
     print('Bot is ready.')
 
+# update instructor id
+@client.command()
+async def changeinstructor(ctx, id):
+    global instructor
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    else:
+        instructor = int(id)
+        await ctx.send(f'Instuctor ID set to {id}')
 
 # Checks for new member join and mutes them.
 @client.event
@@ -298,31 +307,34 @@ async def poll(ctx, *, input_string):
 # bothelp command with refrence for users
 @client.command()
 async def bothelp(ctx):
-    embed = discord.Embed(
-        title='Student Commands',
-        description='Commands for Students',
-        color=discord.Colour.blue()
-    )
-    embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
-    embed.add_field(name='!attendance {student name}', value='logs the student to the attendance log', inline=False)
-    embed.add_field(name='!talk', value='adds the user to the voice queue', inline=False)
-    embed.add_field(name='!done', value='removes the user from the voice queue', inline=False)
-    embed.add_field(name='!queue', value='shows current queue to ask questions', inline=False)
-    embed.add_field(name='!poll', value='creates a reaction poll with format [`!poll <question>? <option1>:<option2>`]', inline=False)
+    if ctx.message.author.id == instructor:
+        instructor_embed = discord.Embed(
+            title='Instructor Comands',
+            description='Commands for Instructors',
+            color=discord.Colour.purple()
+            )
+        instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
+        instructor_embed.add_field(name='!start', value='start class, will mute users in voice chat', inline=False)
+        instructor_embed.add_field(name='!end', value='ends class, will unmutes all users in voice chat', inline=False)
+        instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
+        instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
+        instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
 
-    instructor_embed = discord.Embed(
-        title='Instructor Comands',
-        description='Commands for Instructors',
-        color=discord.Colour.purple()
-    )
-    instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
-    instructor_embed.add_field(name='!start', value='start class, will mute users in voice chat', inline=False)
-    instructor_embed.add_field(name='!end', value='ends class, will unmutes all users in voice chat', inline=False)
-    instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
-    instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
-    instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
+        await ctx.send(embed=instructor_embed)
 
-    await ctx.send(embed=embed)
-    await ctx.send(embed=instructor_embed)
+    else:
+        embed = discord.Embed(
+            title='Student Commands',
+            description='Commands for Students',
+            color=discord.Colour.blue()
+        )
+        embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
+        embed.add_field(name='!attendance {student name}', value='logs the student to the attendance log', inline=False)
+        embed.add_field(name='!talk', value='adds the user to the voice queue', inline=False)
+        embed.add_field(name='!done', value='removes the user from the voice queue', inline=False)
+        embed.add_field(name='!queue', value='shows current queue to ask questions', inline=False)
+        embed.add_field(name='!poll', value='creates a reaction poll with format [`!poll <question>? <option1>:<option2>`]', inline=False)
+
+        await ctx.send(embed=embed)
 
 client.run(token)
