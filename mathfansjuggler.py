@@ -81,6 +81,8 @@ async def next(ctx):
         print(member.voice.mute)
         if not member.voice.mute:
             await forcedone(ctx)
+        if lesson_mode == 'auto':
+            return
         if not user_queue:
             await ctx.send('Queue Empty')
             return
