@@ -2,10 +2,15 @@ import discord
 import os
 from datetime import datetime
 from discord.ext import commands
+from pathlib import Path, PureWindowsPath
 
 client = commands.Bot(command_prefix='!')
 
-user_queue = []
+# Change Per Server Deployment
+token = 'bot_token'
+instructor = 307362705684299777
+server_name = 'Test Server'
+
 
 def get_channel(channel_str):
     for guild in client.guilds:
@@ -19,41 +24,195 @@ def get_guild(guild_str):
         if guild.name == guild_str:
             return guild
 
+# Default values
+user_queue = []
+question_mode = 'single'
+lesson_mode = None
+
+
+# Subroutine to change lesson_mode
+def change_lesson_mode(bool):
+    global lesson_mode
+    lesson_mode = bool
+
+
+# Subroutine to change question_mode
+def change_question_mode(str):
+    global question_mode
+    question_mode = str
+
+
+# Bot activity + load up notifier
 @client.event
 async def on_ready():
+    await client.change_presence(
+        activity=discord.Activity(
+            name='with Numbers', type=discord.ActivityType.playing))
     print('Bot is ready.')
 
+
+# Checks for new member join and mutes them.
+@client.event
+async def on_voice_state_update(member, before, after):
+    guild_obj = get_guild(server_name)
+    # checks if in lesson mode
+    if lesson_mode:
+        if before.channel is None and after.channel is not None:
+            if member.id != instructor:
+                await guild_obj.get_member(member.id).edit(mute=True)
+
+
+# update instructor id
+@client.command()
+async def changeinstructor(ctx, id):
+    global instructor
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    else:
+        instructor = int(id)
+        await ctx.send(f'Instuctor ID set to {id}')
+
+
+# sub routine for done/forcedone to prompt next user
+@client.command()
+async def next(ctx):
+    guild_obj = get_guild(server_name)
+    # checks user permissions
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    # checks if queue has Users
+    if not user_queue:
+        await ctx.send('Queue Empty')
+        return
+    member = guild_obj.get_member(user_queue[0].id)
+    # unmute user in voice channel
+    if member in get_channel('general').members:
+        print(member.voice.mute)
+        if not member.voice.mute:
+            await forcedone(ctx)
+        if lesson_mode == 'auto':
+            return
+        if not user_queue:
+            await ctx.send('Queue Empty')
+            return
+        member = guild_obj.get_member(user_queue[0].id)
+        await guild_obj.get_member(member.id).edit(mute=False)
+        await ctx.send(f'{member} speak permissions set to True')
+        await ctx.send(f'{member} is now asking his/her question')
+        return
+    # if member is not found, pop and retry
+    else:
+        user_queue.pop(0)
+        await ctx.send(
+            f'Unable to find {member} in voice channel, skipping to next user')
+        await next(ctx)
+        return
+
+
+# commands to change question_mode
+@client.command()
+async def qauto(ctx):
+    # checks user permissions
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    global question_mode
+    question_mode = 'auto'
+    await ctx.message.add_reaction("✅")
+
+
+@client.command()
+async def qsingle(ctx):
+    # checks user permissions
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    global question_mode
+    question_mode = 'single'
+    await ctx.message.add_reaction("✅")
+
+
+# allows current user to end their question
 @client.command()
 async def done(ctx):
-    guild_obj = get_guild('MathFanJuggler')
+    guild_obj = get_guild(server_name)
+    if not lesson_mode:
+        await ctx.send('Class is not in session.')
+        return
+
     print(f'queue length {len(user_queue)} and queue is {user_queue}')
     # if user queue empty
+    if not user_queue:
+        await ctx.send('No math fans in line!')
+    # if user who is currently talking wants to stop
+    elif ctx.message.author == user_queue[0]:
+        user_popped = user_queue.pop(0)
+        member = guild_obj.get_member(user_popped.id)
+        # if user in voice channel, mute
+        if ctx.author in get_channel('general').members:
+            await guild_obj.get_member(member.id).edit(mute=True)
+            await ctx.send(f'{member} muted')
+        await ctx.author.edit(mute=True)
+        await ctx.send(
+            f'{user_popped} is no longer in line and is now muted.')
+        await ctx.send(
+            f'There are {len(user_queue)} math fans in line.')
+        # [Auto Mode] next user into their question
+        if question_mode == 'auto':
+            await next(ctx)
+    # if user isnt currently the person talking
+    else:
+        await ctx.send('You are not currently talking')
+
+
+# allows instructor to toggle next user
+@client.command()
+async def forcedone(ctx):
+    guild_obj = get_guild(server_name)
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+
     if not user_queue:
         await ctx.send('No math fans in line!')
     else:
         user_popped = user_queue.pop(0)
         member = guild_obj.get_member(user_popped.id)
-        # if user in text channel, reinstate permissions
-        if ctx.author in get_channel('general').members:
-            await guild_obj.get_member(member.id).edit(mute=False)
-            await ctx.send(f'{member} unmuted')
         # if user in voice channel, unmute
-        voice_channel = get_channel('General')
-        if ctx.author in voice_channel.members:
-            await voice_channel.set_permissions(ctx.author, speak=True)
-            await ctx.send(f'{member} speak permissions set to true')
-        await ctx.author.edit(mute=True)
+        if member in get_channel('general').members:
+            await guild_obj.get_member(member.id).edit(mute=True)
+            await ctx.send(f'{member} muted')
         await ctx.send(
-            f'{user_popped} is no longer in line and is now muted. There are {len(user_queue)} math fans in line.')
+            f'{user_popped} is no longer in line and is now muted.')
+        await ctx.send(
+            f'There are {len(user_queue)} math fans in line.')
 
 
+# shows queue
+@client.command()
+async def queue(ctx):
+    if user_queue:
+        for member in user_queue:
+            queuelist = []
+            queuelist.append(member.name)
+        await ctx.send(f'Current Queue: {queuelist}')
+    else:
+        await ctx.send('Queue is empty!')
+
+
+# queues user to ask a question
 @client.command()
 async def talk(ctx):
+    guild_obj = get_guild(server_name)
+    if not lesson_mode:
+        await ctx.send('Class is not in session.')
+        return
     # dynamically fetch guild object and member
-    guild_obj = guild_obj = get_guild('MathFanJuggler')
     member = guild_obj.get_member(ctx.author.id)
 
-    #if user already in line, do nothing
+    # if user already in line, do nothing
     if ctx.author in user_queue:
         await ctx.send(f'{ctx.author} already in line')
         return
@@ -61,76 +220,124 @@ async def talk(ctx):
     # if user queue empty
     if not user_queue:
         user_queue.append(ctx.author)
-        # unmute member if in the voice channel, unmute
-        if member in get_channel('General').members:
-            await guild_obj.get_member(member.id).edit(mute=False)
-            await ctx.send(f'{member} unmuted')
-
-        # if user in text channel, reinstate permissions
-        if member in get_channel('general').members:
-            await guild_obj.get_member(member.id).edit(speak=True)
-            await ctx.send(f'{member} speak permissions set to True')
-
-        await ctx.send(f'No math fans in line. {ctx.author} unmuted.')
+        await ctx.send(f'{ctx.author} has been added to the queue')
+        if question_mode == 'auto':
+            # unmute member if in the voice channel, unmute
+            if member in get_channel('General').members:
+                await guild_obj.get_member(member.id).edit(mute=False)
+                await ctx.send(f'{member} unmuted')
+            await ctx.send(f'No math fans in line. {ctx.author} unmuted.')
     else:
         user_queue.append(ctx.author)
-        await ctx.send(f'{ctx.author} there are {len(user_queue) - 1} math fans ahead of you in line.')
+        await ctx.send(
+            f'{ctx.author} there are {len(user_queue) - 1} math fans ahead of you in line.')
 
 
+# starts class
 @client.command()
-async def bothelp(ctx):
-    await ctx.send('!attendance {student name} logs the student to the attendance log\n'
-                   '!talk adds the user to the voice queue\n'
-                   '!done removes the user from the voice queue\n'
-                   '!talkall unmutes all users in the server\n'
-                   '!muteall mutes all users in the server\n')
+async def start(ctx):
+    guild_obj = get_guild(server_name)
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
 
+    # sets lesson mode
+    change_lesson_mode(True)
 
-@client.command()
-async def talkall(ctx):
-    # dynamically get guild ID
-    guild_obj = get_guild('MathFanJuggler')
-    print(f'channel {get_channel("General")}')
     # mute all members in the voice channel
     for member in get_channel('General').members:
-        await guild_obj.get_member(member.id).edit(mute=False)
+        if member.id != instructor:
+            await guild_obj.get_member(member.id).edit(mute=True)
 
-    # set all others speak=False
-    voice_channel = get_channel('general')
-    for member in voice_channel.members:
-        await voice_channel.set_permissions(member, speak=True)
+    await ctx.send('Lesson Started! All users muted')
+
+
+# ends class
+@client.command()
+async def end(ctx):
+    guild_obj = get_guild(server_name)
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+
+    # sets lesson mode
+    change_lesson_mode(False)
+
+    # unmute all members in the voice channel
+    for member in get_channel('General').members:
+        await guild_obj.get_member(member.id).edit(mute=False)
 
     await ctx.send('All users unmuted')
 
 
-@client.command()
-async def muteall(ctx):
-    # dynamically get guild ID
-    guild_obj = get_guild('MathFanJuggler')
-
-    # mute all members in the voice channel
-    for member in get_channel('General').members:
-        await guild_obj.get_member(member.id).edit(mute=True)
-
-    # set all others speak=False
-    voice_channel = get_channel('general')
-    for member in voice_channel.members:
-        overwrite = discord.PermissionOverwrite()
-        overwrite.speak = False
-        await voice_channel.set_permissions(member, overwrite=overwrite)
-
-    await ctx.send('All users muted')
-
-
+# command to count attendence
 @client.command()
 async def attendance(ctx, *, student_name):
     time_now = datetime.now()
-    attendance_path = os.path.join(os.getcwd(), 'attendance', f'attendance_{datetime.now().date()}.txt')
+    normpath = os.path.normpath(os.getcwd())
+    data_folder = Path(normpath)
+    attendance_path = data_folder / 'Attendance' / f'attendance_{datetime.now().date()}.txt'
+    attendance_path = PureWindowsPath(attendance_path)
     attendance_file = open(attendance_path, 'a')
     attendance_file.write(f'{time_now.time()} {student_name}\n')
     attendance_file.close()
     await ctx.send(f'{student_name} is here')
 
+# poll command for creating new polls
+@client.command()
+async def poll(ctx, *, input_string):
 
-client.run('token')
+    input_list = input_string.split('? ')
+    if len(input_list) != 2:
+        await ctx.send('Formatting for polls should be: `!poll <question>? <option1>:<option2>`')
+        return
+    input_question = input_list[0] + '?'
+    answers = input_list[1].split(':')
+    emoji_list = ["🐌", "🐇", "🐘", "🐖", "🐏", "🐍", "🐬"]
+    output_list = [f"Poll: {input_question}\n"]
+    if len(answers) > 7:
+        await ctx.send('Too many answers, please reduce the number of answers.')
+        return
+    for indx, val in enumerate(answers):
+        output_list.append(emoji_list[indx] + f" - {val}\n")
+    output_string = ''.join([str(elem) for elem in output_list])
+    msg = await ctx.send(output_string)
+    for indx, val in enumerate(answers):
+        await msg.add_reaction(emoji_list[indx])
+    await ctx.message.delete()
 
+# bothelp command with refrence for users
+@client.command()
+async def bothelp(ctx):
+    if ctx.message.author.id == instructor:
+        instructor_embed = discord.Embed(
+            title='Instructor Comands',
+            description='Commands for Instructors',
+            color=discord.Colour.purple()
+            )
+        instructor_embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
+        instructor_embed.add_field(name='!start', value='start class, will mute users in voice chat', inline=False)
+        instructor_embed.add_field(name='!end', value='ends class, will unmutes all users in voice chat', inline=False)
+        instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
+        instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
+        instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
+        instructor_embed.add_field(name='!changeinstructor {instructor_id}', value='changes instructor to new instructor based on id', inline=False)
+
+        await ctx.send(embed=instructor_embed)
+
+    else:
+        embed = discord.Embed(
+            title='Student Commands',
+            description='Commands for Students',
+            color=discord.Colour.blue()
+        )
+        embed.set_thumbnail(url='https://i.imgur.com/v8CwNn0.png')
+        embed.add_field(name='!attendance {student name}', value='logs the student to the attendance log', inline=False)
+        embed.add_field(name='!talk', value='adds the user to the voice queue', inline=False)
+        embed.add_field(name='!done', value='removes the user from the voice queue', inline=False)
+        embed.add_field(name='!queue', value='shows current queue to ask questions', inline=False)
+        embed.add_field(name='!poll', value='creates a reaction poll with format [`!poll <question>? <option1>:<option2>`]', inline=False)
+
+        await ctx.send(embed=embed)
+
+client.run(token)

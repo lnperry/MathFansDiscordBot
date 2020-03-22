@@ -1,0 +1,2 @@
+python ./mathfansjuggler.py
+pause
