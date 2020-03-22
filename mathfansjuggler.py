@@ -50,16 +50,6 @@ async def on_ready():
             name='with Numbers', type=discord.ActivityType.playing))
     print('Bot is ready.')
 
-# update instructor id
-@client.command()
-async def changeinstructor(ctx, id):
-    global instructor
-    if ctx.message.author.id != instructor:
-        await ctx.send('Missing Permissions. Please check !bothelp')
-        return
-    else:
-        instructor = int(id)
-        await ctx.send(f'Instuctor ID set to {id}')
 
 # Checks for new member join and mutes them.
 @client.event
@@ -70,6 +60,18 @@ async def on_voice_state_update(member, before, after):
         if before.channel is None and after.channel is not None:
             if member.id != instructor:
                 await guild_obj.get_member(member.id).edit(mute=True)
+
+
+# update instructor id
+@client.command()
+async def changeinstructor(ctx, id):
+    global instructor
+    if ctx.message.author.id != instructor:
+        await ctx.send('Missing Permissions. Please check !bothelp')
+        return
+    else:
+        instructor = int(id)
+        await ctx.send(f'Instuctor ID set to {id}')
 
 
 # sub routine for done/forcedone to prompt next user
@@ -319,6 +321,7 @@ async def bothelp(ctx):
         instructor_embed.add_field(name='!qauto', value='changes questions to cycle automatically', inline=False)
         instructor_embed.add_field(name='!qsingle', value='changes questions to cycle one at a time', inline=False)
         instructor_embed.add_field(name='!next', value='cycles to the next student in line', inline=False)
+        instructor_embed.add_field(name='!changeinstructor {instructor_id}', value='changes instructor to new instructor based on id', inline=False)
 
         await ctx.send(embed=instructor_embed)
 
