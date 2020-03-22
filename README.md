@@ -55,6 +55,7 @@ server_name = 'My Test Server'
 Once you have verified that the submitted information is correct, save and exit. Then run the attached 'run.bat'
 
 ## Commands
+
 For the Student:
 Command | Function
 ------------ | -------------
