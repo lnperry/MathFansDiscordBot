@@ -10,7 +10,7 @@ Create an app
 Go to https://discordapp.com/developers/applications/me and create a new app. On your app detail page, save the Client ID. You will need it later to authorize your bot for your server.
 
 Create a bot account for your app
-After creating app, on the app details page, scroll down to the section named bot, and create a bot user. Save the token, you will need it later to run the bot.
+After creating app, on the app details page, scroll down to the section named bot, and create a bot user. **Save the token**, you will need it later to run the bot.
 
 Authorize the bot for your server
 Visit the URL https://discordapp.com/oauth2/authorize?client_id=XXXXXXXXXXXX&scope=bot but replace XXXX with your app client ID. Choose the server you want to add it to and select authorize.
@@ -40,8 +40,8 @@ server_name = 'Test Server'
 ```
 
 You will need to change these values to:
-    1. Your personal token found when you created the bot account on discord (see Installation)
-    2. Your personal client_id which can be found by right clicking your username in any discord chat and selecting 'copy id' at the bottom
+    1. Your personal **token** found when you created the bot account on discord (see Installation)
+    2. Your personal **client_id** which can be found by right clicking your username in any discord chat and selecting 'copy id' at the bottom
     3. The name of the server where you would like to use this bot
 
 The resulting code block should look something like this:
@@ -55,22 +55,25 @@ server_name = 'My Test Server'
 Once you have verified that the submitted information is correct, save and exit. Then run the attached 'run.bat'
 
 ## Commands
-Current Commands/Functions
 
 For the Student:
-!attendance {student name} - logs the student to the attendance log
-!talk - adds the user to the voice queue
-!done - removes the user from the voice queue
-!queue - shows current queue to ask questions
-!poll - creates a reaction poll with format [!poll <question>? <option1>:<option2>]
+Command | Function
+------------ | -------------
+**!attendance {student name}** | logs the student to the attendance log
+**!talk** | adds the user to the voice queue
+**!done** | removes the user from the voice queue
+**!queue** | shows current queue to ask questions
+**!poll** | creates a reaction poll with format [!poll <question>? <option1>:<option2>]
 
 For the Instructor:
-!start - start class, will mute users in voice chat
-!end - ends class, will unmutes all users in voice chat
-!qauto - changes questions to cycle automatically
-!qsingle - changes questions to cycle one at a time
-!next - cycles to the next student in line
-!changeinstructor {instructor_id} - changes the current instructor to a new instructor
+Command | Function
+------------ | -------------
+**!start** | start class, will mute users in voice chat
+**!end** | ends class, will unmutes all users in voice chat
+**!qauto** | changes questions to cycle automatically
+**!qsingle** | changes questions to cycle one at a time
+**!next** | cycles to the next student in line
+**!changeinstructor {instructor_id}** | changes the current instructor to a new instructor
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
