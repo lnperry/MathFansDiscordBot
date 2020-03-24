@@ -1,6 +1,6 @@
 # MathFansDiscordBot
 
-MathFanJuggler is a Python based Discord Bot to help with streaming/lecturing during COVID-19
+MathFansDiscordBot is a Python based Discord Bot to help with streaming/lecturing during COVID-19
 
 ## Installation
 Create a server
@@ -22,14 +22,14 @@ Run pip install from your system terminal/shell/command prompt.
 python -m pip install discord.py
 ```
 
-Download the compressed ZIP file [here](https://github.com/PerryProjects/MathFansJuggler/archive/master.zip) and unzip into another folder.
+Download the compressed ZIP file [here](https://github.com/PerryProjects/MathFansDiscordBot/archive/master.zip) and unzip into another folder.
 
 Instructions Sourced from: [Dungeon Dev](https://www.devdungeon.com/content/make-discord-bot-python) See link for more details
 
 ## Usage
 To start your instance of the bot some changes are needed to the main python file.
 
-Open mathfansjuggler.py with a text editor such as notepad, notepad++, etc.
+Open mathfansdiscordbot.py with a text editor such as notepad, notepad++, etc.
 
 On download, lines 9-12 should look like:
 ```python
