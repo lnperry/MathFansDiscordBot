@@ -1,4 +1,4 @@
-# MathFansJuggler
+# MathFansDiscordBot
 
 MathFanJuggler is a Python based Discord Bot to help with streaming/lecturing during COVID-19
 
