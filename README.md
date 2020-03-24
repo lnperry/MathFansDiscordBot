@@ -41,7 +41,7 @@ current_voice_channel = 0
 
 You will need to change these values to:
 1. Your personal **token** found when you created the bot account on discord (see Installation)
-2. Your personal **client_id** which can be found by right clicking your username in any discord chat and selecting 'copy id' at the bottom
+2. Your personal **instructor_id** which can be found by right clicking your username in any discord chat while in developer mode and selecting 'copy id' at the bottom of the pop up menu
 3. The name of the server where you would like to use this bot
 4. Set current voice channel with the bot command !changeinstructor
 
