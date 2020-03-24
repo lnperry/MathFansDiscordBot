@@ -35,14 +35,15 @@ On download, lines 9-12 should look like:
 ```python
 # Change Per Server Deployment
 token = 'bot_token'
-instructor = 307362705684299777
-server_name = 'Test Server'
+instructor = 'instructor_ID'
+current_voice_channel = 0
 ```
 
 You will need to change these values to:
 1. Your personal **token** found when you created the bot account on discord (see Installation)
 2. Your personal **client_id** which can be found by right clicking your username in any discord chat and selecting 'copy id' at the bottom
 3. The name of the server where you would like to use this bot
+4. Set current voice channel with the bot command !changeinstructor
 
 The resulting code block should look something like this:
 ```python
