@@ -3,8 +3,8 @@
 MathFansDiscordBot is a Python based Discord Bot to help with streaming/lecturing during COVID-19
 
 ## Installation
-Create a server
-If you don't already have a server, create one free one at https://discordapp.com. Simply log in, and then click the plus sign on the left side of the main window to create a new server.
+###Create a server
+Create a free server at https://discordapp.com. Simply log in, and then click the plus sign on the left side of the main window to create a new server.
 
 Create an app
 Go to https://discordapp.com/developers/applications/me and create a new app. On your app detail page, save the Client ID. You will need it later to authorize your bot for your server.
