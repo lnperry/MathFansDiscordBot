@@ -11,7 +11,7 @@ Go to https://discordapp.com/developers and create a new application.
 
 ###### Create a Bot
 Navigate to the Bot tab in your Discord application details, and click Add Bot.
-![Image of Adding Bot](https://imgur.com/1ZhnfNp)
+https://imgur.com/1ZhnfNp
 
 ###### Generating server authentication hyperlink a Bot user
 Navigate to the OAuth2 tab in your Discord application details, under the scope table toggle the bot checkbox. Scroll down to the permissions and toggle administrator permissions. Copy the hyperlink
