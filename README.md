@@ -3,35 +3,46 @@
 MathFansDiscordBot is a Python based Discord Bot to help with streaming/lecturing during COVID-19
 
 ## Installation
-###Create a server
-Create a free server at https://discordapp.com. Simply log in, and then click the plus sign on the left side of the main window to create a new server.
+##### Create a server
+Create a free server at https://discordapp.com if you do not have one yet. Simply log in, and then click the plus sign on the left side of the main window to create a new server.
 
-Create an app
-Go to https://discordapp.com/developers/applications/me and create a new app. On your app detail page, save the Client ID. You will need it later to authorize your bot for your server.
+###### Create an application
+Go to https://discordapp.com/developers and create a new application.
 
-Create a bot account for your app
-After creating app, on the app details page, scroll down to the section named bot, and create a bot user. **Save the token**, you will need it later to run the bot.
+###### Create a Bot
+Navigate to the Bot tab in your Discord application details, and click Add Bot.
+![Image of Adding Bot](https://imgur.com/1ZhnfNp)
 
-Authorize the bot for your server
-Visit the URL https://discordapp.com/oauth2/authorize?client_id=XXXXXXXXXXXX&scope=bot but replace XXXX with your app client ID. Choose the server you want to add it to and select authorize.
+###### Generating server authentication hyperlink a Bot user
+Navigate to the OAuth2 tab in your Discord application details, under the scope table toggle the bot checkbox. Scroll down to the permissions and toggle administrator permissions. Copy the hyperlink
+MathFansDiscordBot uses administrator permissions for the Queue feature, but does not need admin permissions to take attendance.
+![Image of Adding Bot](https://imgur.com/iJJY7md)
 
-Install the python package discord.py
-Run pip install from your system terminal/shell/command prompt.
+##### Authorizing a bot user
+Visit the hyperlink in your web browser and follow the instructions to authorize your Bot user.
+![Image of Adding Bot](https://imgur.com/0bvAitV)
+
+###### Save the Bot user token
+Navigate back to the Bot tab after creating your application and create a bot user. **Save the token**, you will need it later to run the bot. ***Do NOT share the token with any unathorized users or post online***
+![Image of Adding Bot](https://imgur.com/m9IKkVO)
+
+###### Install the python package discord.py
+Open python from your system terminal/shell/command prompt and use the example below to install discord.py.
 
 ```bash
 python -m pip install discord.py
 ```
 
+## Using MathFansDiscordBot
+
+##### Installation
 Download the compressed ZIP file [here](https://github.com/PerryProjects/MathFansDiscordBot/archive/master.zip) and unzip into another folder.
 
-Instructions Sourced from: [Dungeon Dev](https://www.devdungeon.com/content/make-discord-bot-python) See link for more details
-
-## Usage
+###### Usage
 To start your instance of the bot some changes are needed to the main python file.
+Open [MathFansDiscordBot.py](https://github.com/PerryProjects/MathFansDiscordBot/blob/master/mathfansdiscordbot.py) with a text editor such as notepad, notepad++, etc. or an IDE of choice.
 
-Open mathfansdiscordbot.py with a text editor such as notepad, notepad++, etc.
-
-On download, lines 9-12 should look like:
+On download, lines 12-14 will include the text:
 ```python
 # Change Per Server Deployment
 token = 'bot_token'
@@ -39,11 +50,11 @@ instructor = 'instructor_ID'
 current_voice_channel = 0
 ```
 
-You will need to change these values to:
-1. Your personal **token** found when you created the bot account on discord (see Installation)
-2. Your personal **instructor_id** which can be found by right clicking your username in any discord chat while in developer mode and selecting 'copy id' at the bottom of the pop up menu
-3. The name of the server where you would like to use this bot
-4. Set current voice channel with the bot command !changeinstructor
+You must change these values to:
+1. Your personal **token** found when you created the bot account on discord (see Installation).
+2. Your personal **instructor_id** which can be found by using the Discord desktop app in developer mode and right clicking your username in then selecting 'copy id' at the bottom of the pop up menu.
+3. The name of the server where you would like to use this bot.
+4. Set current voice channel with the bot command !changeinstructor.
 
 The resulting code block should look something like this:
 ```python
