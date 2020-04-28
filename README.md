@@ -6,14 +6,14 @@ MathFansDiscordBot is a Python based Discord Bot to help with streaming/lecturin
 ##### Create a server
 Create a free server at https://discordapp.com if you do not have one yet. Simply log in, and then click the plus sign on the left side of the main window to create a new server.
 
-###### Create an application
+##### Create an application
 Go to https://discordapp.com/developers and create a new application.
 
-###### Create a Bot
+##### Create a Bot
 Navigate to the Bot tab in your Discord application details, and click Add Bot.
 ![Image of Adding Bot](https://i.imgur.com/1ZhnfNp.png)
 
-###### Generating server authentication hyperlink a Bot user
+##### Generating server authentication hyperlink a Bot user
 Navigate to the OAuth2 tab in your Discord application details, under the scope table toggle the bot checkbox. Scroll down to the permissions and toggle administrator permissions. Copy the hyperlink
 MathFansDiscordBot uses administrator permissions for the Queue feature, but does not need admin permissions to take attendance.
 ![Image of Adding Bot](https://i.imgur.com/iJJY7md.png)
@@ -22,11 +22,11 @@ MathFansDiscordBot uses administrator permissions for the Queue feature, but doe
 Visit the hyperlink in your web browser and follow the instructions to authorize your Bot user.
 ![Image of Adding Bot](https://i.imgur.com/0bvAitV.png)
 
-###### Save the Bot user token
+##### Save the Bot user token
 Navigate back to the Bot tab after creating your application and create a bot user. **Save the token**, you will need it later to run the bot. ***Do NOT share the token with any unathorized users or post online***
 ![Image of Adding Bot](https://i.imgur.com/m9IKkVO.png)
 
-###### Install the python package discord.py
+##### Install the python package discord.py
 Open python from your system terminal/shell/command prompt and use the example below to install discord.py.
 
 ```bash
@@ -38,7 +38,7 @@ python -m pip install discord.py
 ##### Installation
 Download the compressed ZIP file [here](https://github.com/PerryProjects/MathFansDiscordBot/archive/master.zip) and unzip into another folder.
 
-###### Usage
+##### Usage
 To start your instance of the bot some changes are needed to the main python file.
 Open [MathFansDiscordBot.py](https://github.com/PerryProjects/MathFansDiscordBot/blob/master/mathfansdiscordbot.py) with a text editor such as notepad, notepad++, etc. or an IDE of choice.
 
